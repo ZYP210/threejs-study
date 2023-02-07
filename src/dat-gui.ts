@@ -1,6 +1,8 @@
-//控制3d物体移动
+// 用dat-gui 可视化操作栏编辑threejs图像
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import * as dat from "dat.gui"
+import gsap from "gsap"
 
 //创建一个场景
 const scene = new THREE.Scene();
@@ -16,8 +18,6 @@ scene.add(camera);
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-//修改物体位置
-// cube.position.set(3, 0, 0)
 scene.add(cube);
 
 //添加辅助坐标系轴
@@ -35,12 +35,13 @@ document.body.appendChild(renderer.domElement)
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
+//设置控制器阻尼，让控制器更真实（必须在动画循环时调用update）
+controls.enableDamping = true
+
 function animate() {
-  cube.position.x += 0.01;
-  if (cube.position.x > 5) {
-    cube.position.x = 0
-  }
   requestAnimationFrame(animate);
+
+  controls.update();
 
   renderer.render(scene, camera);
 
@@ -48,3 +49,35 @@ function animate() {
 
 animate()
 
+
+//初始化 dat.gui
+const gui = new dat.GUI()
+
+gui.add(cube.position, "x").min(0).max(5).step(0.01).name('移动x').onChange(() => {
+  console.log('值修改了');
+}).onFinishChange(() => {
+  console.log('完全停了');
+})
+
+//设置颜色
+gui.addColor({ color: '#fff000' }, 'color').onChange((val) => {
+  cube.material.color.set(val)
+})
+
+//设置选项框
+gui.add(cube, 'visible').name('是否显示')
+
+//设置按钮点击触发某个事件
+const params = {
+  fn() {
+    gsap.to(cube.position, { x: 5, duration: 2, yoyo: true, repeat: -1 })
+  }
+}
+gui.add(params, "fn").name('立方体运动')
+
+//设置属性放文件夹里
+const folder = gui.addFolder('设置立方体')
+folder.add(cube.material, "wireframe")
+
+
+console.log(cube);

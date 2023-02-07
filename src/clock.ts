@@ -1,4 +1,4 @@
-//控制3d物体移动
+//跟踪时间
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
@@ -16,8 +16,6 @@ scene.add(camera);
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const cube = new THREE.Mesh(geometry, material);
-//修改物体位置
-// cube.position.set(3, 0, 0)
 scene.add(cube);
 
 //添加辅助坐标系轴
@@ -33,13 +31,19 @@ renderer.render(scene, camera)
 
 document.body.appendChild(renderer.domElement)
 
+
+//设置时钟
+const clock = new THREE.Clock();
+
 const controls = new OrbitControls(camera, renderer.domElement);
 
 function animate() {
-  cube.position.x += 0.01;
-  if (cube.position.x > 5) {
-    cube.position.x = 0
-  }
+  //时钟运行的总时长
+  const time = clock.getElapsedTime();
+  //两次获取时间的间隔时间
+  // const delta = clock.getDelta()
+
+  cube.position.x = time % 5
   requestAnimationFrame(animate);
 
   renderer.render(scene, camera);
